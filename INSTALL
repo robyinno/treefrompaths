@@ -1,0 +1,4 @@
+require:
+
+php 5.x
+php mb_string extension
