@@ -22,10 +22,17 @@ foreach (file($pathfile) as $line_mb){
 	  $value = preg_replace('/"(.*)"/','${1}',$value);
 	  $value = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $value);
   }
-  $data['arPaths'][]=$row;
+  if (isset($row[0]) && count(explode('\\',$row[0]))>1) $data['arPaths'][]=$row;
 }
+
 require_once('treefrompaths.php');
+require_once('functions.php');
+#$data['ul_open']='<ul class="dhtmlgoodies_tree">';
+#$data['li_open']='<li class="dhtmlgoodies_treeNode">';
+#$data['img_folder']='<img src="images/dhtmlgoodies_folder.gif">';
 $tree=new TreeFromPaths($data);
+echo '<ul class="dhtmlgoodies_tree" id="dhtmlgoodies_tree">';
 echo $tree->render();
+echo '</ul>';
 
 ?>
