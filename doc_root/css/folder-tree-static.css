@@ -23,13 +23,10 @@
 		
 	}
 	.dhtmlgoodies_tree li a{	/* Node links */
-		/*color:#000;*/
+		/*color:#000;*/ /* modified from Roberto Innocenti */
 		text-decoration:none;
-		font-family:curier;
+		font-family:curier; /* modified from Roberto Innocenti */
 		font-size:0.8em;
 		padding-left:2px;
 	}
 	
-	a.green_color {
-		color:green;
-	}
