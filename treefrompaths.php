@@ -35,10 +35,14 @@ class TreeFromPaths {
 		return $this->html;
 	}
 
+	public function get_html(){
+	    return $this->html;
+	}
+
 	/*
 	* creare the html in relation to the wave of variation of the paths
 	*/
-	private function waveSegment(){
+	private function waveSegment($returnHTML=false){
 		
 		$max_cur_levels=count($this->arCurSegments)-1; # max levels of current segment
 		$max_last_levels=count($this->arLastSegments)-1; 
@@ -81,7 +85,11 @@ class TreeFromPaths {
 			
 			if ($level==$max_cur_levels) $this->html_new.=$this->li_close."\n";
 		}
-		$this->html.=$this->html_old.$this->html_new;
+		if ($returnHTML){
+		    return $this->html_old.$this->html_new;
+		} else {
+		    $this->html.=$this->html_old.$this->html_new;
+		}
 	}
 
 	protected function prep_leaf_details(&$row){
@@ -90,16 +98,20 @@ class TreeFromPaths {
 	    isset($row[4]) ? $this->status = $row[4] : $this->status = '';
 	}
 
-	private function core(){
-		# go in every line of the csv
-		foreach ($this->arPaths as $key=>$row){
-			$path=trim($row[0]);
-			#print $path;
-			$this->arLastSegments=$this->arCurSegments;
-			$this->arCurSegments=explode($this->path_separator,$path);
-			$this->prep_leaf_details($row);
-			$this->waveSegment();
-		}
+	public function single_row($row,$returnHTML=false){
+	    $path=trim($row[0]);
+	    $this->arLastSegments=$this->arCurSegments;
+	    $this->arCurSegments=explode($this->path_separator,$path);
+	    $this->prep_leaf_details($row);
+	    $html=$this->waveSegment($returnHTML);
+	    if ($returnHTML) return $html;
+	}
+
+	public function core(){
+	    # go in every line of the csv
+	    foreach ($this->arPaths as $key=>$row){
+		  $this->single_row($row);
+	    }
 	}		
 }
 ?>
