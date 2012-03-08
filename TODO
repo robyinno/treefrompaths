@@ -1,1 +1,3 @@
-add .css to dress the html with folder and file icons
+- use only a part of the info from the csv ( decrease the size of the html generated)
+- be ready for make and save the html from cron 
+- show icons in relation to the state of the recover of the file 
