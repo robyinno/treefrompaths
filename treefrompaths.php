@@ -27,6 +27,9 @@ class TreeFromPaths {
 		}
 	}
 
+	/**
+	* Starting from array of Paths infos return one html string
+	*/
 	public function render($echo=false,&$arPaths=null){
 		if ($arPaths){
 			$this->arPaths=$arPaths;			
@@ -35,12 +38,15 @@ class TreeFromPaths {
 		return $this->html;
 	}
 
+	/**
+	* Return the html compiled from array of Paths
+	*/
 	public function get_html(){
 	    return $this->html;
 	}
 
 	/*
-	* creare the html in relation to the wave of variation of the paths
+	* create the html in relation to the wave of variation of the paths
 	*/
 	private function waveSegment($returnHTML=false){
 		
@@ -92,12 +98,18 @@ class TreeFromPaths {
 		}
 	}
 
+	/*
+	* Prepare the leaf of every file
+	*/
 	protected function prep_leaf_details(&$row){
 	    isset($row[1]) ? $this->datet = $row[1] : $this->datet = '';
 	    isset($row[2]) ? $this->size = human_filesize($row[2]) : $this->size = '';
 	    isset($row[4]) ? $this->status = $row[4] : $this->status = '';
 	}
 
+	/**
+	* Return or add in $this->html the html of single file
+	*/
 	public function single_row($row,$returnHTML=false){
 	    $path=trim($row[0]);
 	    $this->arLastSegments=$this->arCurSegments;
@@ -107,6 +119,16 @@ class TreeFromPaths {
 	    if ($returnHTML) return $html;
 	}
 
+	/**
+	* Append to an html file a single file info
+	*/
+	public function append_html_file($row,$pathfile){
+	    return file_put_contents($pathfile,$this->single_row($row,true),FILE_APPEND);
+	}
+
+	/**
+	* Read the the array of files and compile html in $this->html
+ 	*/
 	public function core(){
 	    # go in every line of the csv
 	    foreach ($this->arPaths as $key=>$row){
