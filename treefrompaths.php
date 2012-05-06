@@ -18,10 +18,17 @@ class TreeFromPaths {
 	private $datet='';
 	private $size='';
 	private $status='';
+	private $error_level = array('Header OK'=>'00','Header Corrotto'=>'01', 'Nessuna estensione'=>'02',
+				     'Tipo di file ambiguo o sconosciuto'=>'03' ,'File Criptato'=>'04','Errore di accesso' => '05',
+			 	     'File troppo piccolo (<512 bytes)'=>'06','File con lunghezza = 0'=>'07',
+				     'Nomefile non valuido'=>'08','Risulta come tipo di  file:'=>'09');
+	private $icon_level = array('00'=>'green','01'=>'yellow','02'=>'yellow','03'=>'yellow','04'=>'yellow',
+				    '05'=>'yellow','06'=>'yellow','07'=>'yellow','08'=>'yellow','09'=>'red');
 
 	public function __construct(&$params){
 		if (is_array($params)){
-			foreach (array('arPaths','path_separator','li_open','li_close','ul_open','ul_close','img_folder') as $key){
+			foreach (array('arPaths','path_separator','li_open','li_close',
+				       'ul_open','ul_close','img_folder','error_level') as $key){
 				if (isset($params[$key])) $this->{$key}=$params[$key];
 			}			
 		}
@@ -77,11 +84,14 @@ class TreeFromPaths {
 			      if ($this->html_old=='' && $dif_level) $img_folder=$this->img_folder;
 			      $this->n_node +=1;
 			      !$dif_level ? $label_details=' '. $this->datet.' '. $this->size.' '.$this->status : $label_details='';
-			      strpos($this->status,'OK')!==FALSE ? $class='class="green_color"' : $class='';
-			      $label='<a '.$class.' id="node_'.$this->n_node.'" href="#">'.$new_segment.$label_details.'</a></div>';
+
+			      #strpos($this->status,'OK')!==FALSE ? $class='class="green_color"' : $class='';
+			      $this->icon != '' ?  $class='class="'. $this->icon .'"' : $class='';
+			      $ico = '<a href="#" '.$class.'>&nbsp;</a>';
+			      $label='<a id="node_'.$this->n_node.'" href="#">'.$new_segment.$label_details.'</a></div>';
 			      
 			      !$dif_level ? $li_open=$this->li_open_shet : $li_open=$this->li_open; # is a leaf
-			      $this->html_new.=$li_open.$img_folder.$label."\n";
+			      $this->html_new.=$li_open.$ico.$img_folder.$label."\n";
 
 			      if ($dif_level) { # if is not leaf
 				  $this->html_new.=$this->ul_open."\n"; // "<ul class='$level'>"."\n";
@@ -105,6 +115,18 @@ class TreeFromPaths {
 	    isset($row[1]) ? $this->datet = $row[1] : $this->datet = '';
 	    isset($row[2]) ? $this->size = human_filesize($row[2]) : $this->size = '';
 	    isset($row[4]) ? $this->status = $row[4] : $this->status = '';
+	    $this->icon = $this->get_icon($this->status);
+	}
+
+	/*
+	* Get icon color from Status
+	*/
+	protected function get_icon($status){
+	    $arStatus = explode(':',$status);
+	    $tmp_status = $arStatus[0];
+	    isset($this->error_level[$tmp_status]) ? $icon = $this->error_level[$tmp_status] : $icon = '';
+	    isset($this->icon_level[$icon]) ? $icon_color = $this->icon_level[$icon] : $icon_color = '';
+	    return $icon_color;
 	}
 
 	/**
