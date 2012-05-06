@@ -1,3 +1,12 @@
-	a.green_color {
-		color:green;
+	a.green {
+		background:url('../images/icon/GREEN.ico') no-repeat 0 0;
+		background-size:16px;
+	}
+	a.yellow {
+		background:url('../images/icon/YELLOW.ico') no-repeat 0 0;
+		background-size:16px;
+	}
+	a.red {
+		background:url('../images/icon/RED.ico') no-repeat 0 0;
+		background-size:16px;
 	}
