@@ -2,9 +2,11 @@ Tree from Paths
 Import a CSV file created with "File List Viewer"
 that contains the paths of an analized HDD for future recovery
 
-Generate a html file with <li> and <ul> ready to be dressed with css
+- Generate a html file with <li> and <ul> ready to be dressed with css
 to give an html folder/files view
 
+- Select the folders
+ 
 In the doc_root directory you can find the js and css filse needed to dress the html generated
 from "Tree from Paths" scripts.
 The js files and al css file excepts treefrompaths.css are copyleft from DTHMLGoodies.com,
