@@ -8,6 +8,7 @@ class TreeFromPaths {
 	private $li_close='</li>';
 	private $ul_close='</ul>';
 	private $ul_open='<ul>';
+	private $checkbox = '<input type="checkbox" name="folder_select[]" value="%s">';
 	private $html_new='';
 	private $html_old='';
 	private $html='';
@@ -28,7 +29,7 @@ class TreeFromPaths {
 	public function __construct(&$params){
 		if (is_array($params)){
 			foreach (array('arPaths','path_separator','li_open','li_close',
-				       'ul_open','ul_close','img_folder','error_level') as $key){
+				       'ul_open','ul_close','img_folder','error_level','checkbox') as $key){
 				if (isset($params[$key])) $this->{$key}=$params[$key];
 			}			
 		}
@@ -52,6 +53,13 @@ class TreeFromPaths {
 	    return $this->html;
 	}
 
+	/**
+	* ret path complete at current level
+	*/	
+	private function _get_path($level){
+	    return implode(array_slice($this->arCurSegments,0,$level+1),$this->path_separator);    
+	}
+
 	/*
 	* create the html in relation to the wave of variation of the paths
 	*/
@@ -72,7 +80,9 @@ class TreeFromPaths {
 		
 		foreach ($this->arCurSegments as $level=>$new_segment){ # one clicle every segment 
 			isset($this->arLastSegments[$level]) ? $old_segment=$this->arLastSegments[$level] : $old_segment='';
-			$img_folder='';
+			$img_folder = '';
+			$checkbox = '';
+
 			# open folder and files
 			if ($new_segment!==$old_segment){
 			      $dif_level=($level!=$max_cur_levels);
@@ -81,17 +91,22 @@ class TreeFromPaths {
 			      if ($level<$max_last_levels && $dif_level) $this->html_old.=$this->ul_close."\n".$this->li_close."\n";
 
 			      # add img folder if is a folder
-			      if ($this->html_old=='' && $dif_level) $img_folder=$this->img_folder;
+			      if ($this->html_old=='' && $dif_level) $img_folder = $this->img_folder; 	
 			      $this->n_node +=1;
 			      !$dif_level ? $label_details=' '. $this->datet.' <span class="color_size">'.$this->size.'</span>'.$this->status : $label_details='';
 
-			      #strpos($this->status,'OK')!==FALSE ? $class='class="green_color"' : $class='';
 			      $this->icon != '' ?  $class='class="'. $this->icon .'"' : $class='';
-			      $ico = '<a href="#" '.$class.'>&nbsp;</a>';
-			      $label='<a id="node_'.$this->n_node.'" href="#">'.$new_segment.$label_details.'</a></div>';
+			      $ico   = '<a href="#" '.$class.'>&nbsp;</a>';
+			      $label ='<a id="node_'.$this->n_node.'" href="#">'.$new_segment.$label_details.'</a></div>';
 			      
-			      !$dif_level ? $li_open=$this->li_open_shet : $li_open=$this->li_open; # is a leaf
-			      $this->html_new.=$li_open.$ico.$img_folder.$label."\n";
+			      if (!$dif_level) {
+			          $li_open=$this->li_open_shet;
+			      } else {
+				  $path = $this->_get_path($level);
+				  $checkbox = sprintf($this->checkbox,$this->_get_path($level));
+				  $li_open=$this->li_open; # is a leaf
+		 	      }
+			      $this->html_new.=$li_open.$checkbox.$ico.$img_folder.$label."\n";
 
 			      if ($dif_level) { # if is not leaf
 				  $this->html_new.=$this->ul_open."\n"; // "<ul class='$level'>"."\n";
