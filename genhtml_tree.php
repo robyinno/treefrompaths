@@ -17,8 +17,9 @@ $path_info = pathinfo($_FILES['file_csv']['name']);
 $filename_html = $path_info['filename'] . '.html';
 $pathfile_html = getcwd() . $HTML_DIR . $filename_html;
 
-file_put_contents($pathfile_html,file_get_contents('header.html'),FILE_APPEND);
+file_put_contents($pathfile_html,file_get_contents('header.html'));
 file_put_contents($pathfile_html,'<ul class="dhtmlgoodies_tree" id="dhtmlgoodies_tree">',FILE_APPEND);
+file_put_contents($pathfile_html,'<form name="select_dir" action="../save_dirs_selected.php" method="post"><input type="submit"><input name="filename" type="hidden" value="' . $filename_html . '" />',FILE_APPEND);
 
 foreach (file($pathfile) as $line_mb){
   $encode_from=mb_detect_encoding($line_mb);
@@ -35,7 +36,7 @@ foreach (file($pathfile) as $line_mb){
   	$tree->append_html_file($row,$pathfile_html);
   }
 }
-
+file_put_contents($pathfile_html,'</form>',FILE_APPEND);
 file_put_contents($pathfile_html,'</ul>',FILE_APPEND);
 file_put_contents($pathfile_html,file_get_contents('footer.html'),FILE_APPEND);
 
