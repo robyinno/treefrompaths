@@ -19,8 +19,11 @@ $path_file =  $upload_handler->options['upload_dir']. $file_arr['name'];
 require_once('../../settings.php');
 require_once('../../class/uploads.error.php');
 ini_set('memory_limit','512M');
-
-$GLOBALS['file_tree_name']=decompress::extract($path_file);
 require_once('../../genhtml_tree.php');
+
+# memorizza il file decompresso da trattare 
+$path_file = decompress::extract($path_file);
+echo genhtml_tree($path_file);
+
 
 
