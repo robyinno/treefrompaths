@@ -23,7 +23,10 @@ require_once('../../genhtml_tree.php');
 
 # memorizza il file decompresso da trattare 
 $path_file = decompress::extract($path_file);
-echo genhtml_tree($path_file);
+$url = genhtml_tree($path_file);
+if (substr($url,0,5) == '[URL]'){
+	echo substr($url,5,strlen($url)-5);
+}
 
 
 
