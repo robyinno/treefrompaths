@@ -60,6 +60,95 @@ class TreeFromPaths {
 	    return implode(array_slice($this->arCurSegments,0,$level+1),$this->path_separator);    
 	}
 
+	
+	## to extends
+	 
+	protected function close_diff_levels(){
+		$this->html_old.=$this->ul_close."\n".$this->li_close."\n";
+	}
+	
+	protected function open_tree(){
+		# add img folder if is a folder
+		if ($this->html_old=='' && $this->dif_level) $var_img_folder = $this->img_folder;
+		$this->n_node +=1;
+		!$this->dif_level ? $label_details=' '. $this->datet.' <span class="color_size">'.$this->size.'</span>'.$this->status : $label_details='';
+		
+		$this->icon != '' ?  $class='class="'. $this->icon .'"' : $class='';
+		$ico   = '<a href="#" '.$class.'>&nbsp;</a>';
+		$label ='<a id="node_'.$this->n_node.'" href="#">'.$new_segment.$label_details.'</a></div>';
+		
+		if (!$this->dif_level) { # folder
+			$li_open=$this->li_open_shet;
+		} else { # leaf
+			$path = $this->_get_path($level);
+			$checkbox = sprintf($this->checkbox,$this->_get_path($level));
+			$li_open=$this->li_open; # is a leaf
+		}
+		
+		$this->html_new.=$li_open.$checkbox.$ico.$this->var_img_folder.$label."\n";
+		
+		if (!$this->dif_level) { # folder
+			$this->html_new.=$this->ul_open."\n";
+			$this->ul_open_done=true;
+		}
+	}
+	
+	protected function close_tree(){
+		$this->html_new.=$this->li_close."\n";
+	}
+	
+	protected function reset_render(){
+		$this->html_new = '';
+		$this->html_old = '';
+		$this->ul_open_done = false;
+	}
+	protected function reset_segment(){
+		$this->var_img_folder = '';
+		$this->var_checkbox = '';
+	}
+	protected function render_segment($returnHTML){
+		if ($returnHTML){
+			return $this->html_old.$this->html_new;
+		} else {
+			$this->html.=$this->html_old.$this->html_new;
+		}
+	}	
+	### end to extends
+	
+	/** 
+	 * Logic Core of WaveSegment
+	 */
+	private function waveSegment_core($returnHTML=false){
+	
+		$max_cur_levels=count($this->arCurSegments)-1; # max levels of current segment
+		$max_last_levels=count($this->arLastSegments)-1;
+		$already_closed=false;
+		$this->reset_render()			
+	
+		if ($max_cur_levels<$max_last_levels){
+			for($i=1;$i<=($max_last_levels-$max_cur_levels);$i++){ # close the li and ul of the different levels
+				$this->close_diff_levels();				
+			}
+		}
+	
+		foreach ($this->arCurSegments as $level=>$new_segment){ # one clicle every segment
+			isset($this->arLastSegments[$level]) ? $old_segment=$this->arLastSegments[$level] : $old_segment='';
+			$this->reset_segment()				
+			# open folder and files
+			if ($new_segment!==$old_segment){
+				$this->dif_level=($level!=$max_cur_levels);
+				# close li and ul of the changed segment until there where levels in the last segments
+				if ($level<$max_last_levels && $this->dif_level) $this->close_diff_levels();
+				$this->open_tree(); #!$dif_level => folder 				
+			}
+			if ($level==$max_cur_levels) $this->close_tree() 
+		}
+		$this->render_segment($returnHTML)		
+	}
+	
+	
+	
+	
 	/*
 	* create the html in relation to the wave of variation of the paths
 	*/
