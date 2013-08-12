@@ -1,6 +1,9 @@
 <?php
 class TreeFromPaths {
 
+	protected $new_segment;
+	protected $level;
+	
 	private $arPaths;
 	private $path_separator='\\';
 	private $li_open='<li>';
@@ -75,17 +78,17 @@ class TreeFromPaths {
 		
 		$this->icon != '' ?  $class='class="'. $this->icon .'"' : $class='';
 		$ico   = '<a href="#" '.$class.'>&nbsp;</a>';
-		$label ='<a id="node_'.$this->n_node.'" href="#">'.$new_segment.$label_details.'</a></div>';
+		$label ='<a id="node_'.$this->n_node.'" href="#">'.$this->new_segment.$label_details.'</a></div>';
 		
 		if (!$this->dif_level) { # folder
 			$li_open=$this->li_open_shet;
 		} else { # leaf
-			$path = $this->_get_path($level);
-			$checkbox = sprintf($this->checkbox,$this->_get_path($level));
+			$path = $this->_get_path($this->level);
+			$this->var_checkbox = sprintf($this->checkbox,$this->_get_path($this->level));
 			$li_open=$this->li_open; # is a leaf
 		}
 		
-		$this->html_new.=$li_open.$checkbox.$ico.$this->var_img_folder.$label."\n";
+		$this->html_new.=$li_open.$this->var_checkbox.$ico.$this->var_img_folder.$label."\n";
 		
 		if (!$this->dif_level) { # folder
 			$this->html_new.=$this->ul_open."\n";
@@ -107,6 +110,7 @@ class TreeFromPaths {
 		$this->var_checkbox = '';
 	}
 	protected function render_segment($returnHTML){
+		#error_log($this->html_old.$this->html_new);
 		if ($returnHTML){
 			return $this->html_old.$this->html_new;
 		} else {
@@ -118,12 +122,12 @@ class TreeFromPaths {
 	/** 
 	 * Logic Core of WaveSegment
 	 */
-	private function waveSegment_core($returnHTML=false){
-	
+	private function waveSegment($returnHTML=false){
+		#error_log(__FILE__ . __FUNCTION__);
 		$max_cur_levels=count($this->arCurSegments)-1; # max levels of current segment
 		$max_last_levels=count($this->arLastSegments)-1;
 		$already_closed=false;
-		$this->reset_render()			
+		$this->reset_render();		
 	
 		if ($max_cur_levels<$max_last_levels){
 			for($i=1;$i<=($max_last_levels-$max_cur_levels);$i++){ # close the li and ul of the different levels
@@ -131,19 +135,19 @@ class TreeFromPaths {
 			}
 		}
 	
-		foreach ($this->arCurSegments as $level=>$new_segment){ # one clicle every segment
-			isset($this->arLastSegments[$level]) ? $old_segment=$this->arLastSegments[$level] : $old_segment='';
-			$this->reset_segment()				
+		foreach ($this->arCurSegments as $this->level=>$this->new_segment){ # one clicle every segment
+			isset($this->arLastSegments[$this->level]) ? $old_segment=$this->arLastSegments[$this->level] : $old_segment='';
+			$this->reset_segment();			
 			# open folder and files
-			if ($new_segment!==$old_segment){
-				$this->dif_level=($level!=$max_cur_levels);
+			if ($this->new_segment!==$old_segment){
+				$this->dif_level=($this->level!=$max_cur_levels);
 				# close li and ul of the changed segment until there where levels in the last segments
-				if ($level<$max_last_levels && $this->dif_level) $this->close_diff_levels();
+				if ($this->level<$max_last_levels && $this->dif_level) $this->close_diff_levels();
 				$this->open_tree(); #!$dif_level => folder 				
 			}
-			if ($level==$max_cur_levels) $this->close_tree() 
+			if ($this->level==$max_cur_levels) $this->close_tree(); 
 		}
-		$this->render_segment($returnHTML)		
+		return $this->render_segment($returnHTML);	
 	}
 	
 	
@@ -152,7 +156,7 @@ class TreeFromPaths {
 	/*
 	* create the html in relation to the wave of variation of the paths
 	*/
-	private function waveSegment($returnHTML=false){
+	private function waveSegment_old($returnHTML=false){
 		
 		$max_cur_levels=count($this->arCurSegments)-1; # max levels of current segment
 		$max_last_levels=count($this->arLastSegments)-1; 
