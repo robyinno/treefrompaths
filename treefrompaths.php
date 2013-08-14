@@ -8,10 +8,14 @@ abstract class TreeFromPathsAbstract {
 	protected $path_separator='\\';
 	protected $arCurSegments;
 	protected $arLastSegments;
+	protected $datet='';
+	protected $size='';
+	protected $status='';
 	
-	
+	/**
+	* Starting from array of Paths infos return one string render of the whole arPaths
+	*/
 	abstract public function render($echo,&$arPaths);
-	abstract public function get_html();
 	/**
 	* ret path complete at current level
 	*/	
@@ -23,7 +27,7 @@ abstract class TreeFromPathsAbstract {
 	abstract protected function close_tree();
 	abstract protected function reset_render();
 	abstract protected function reset_segment();
-	abstract protected function render_segment($returnHTML);
+	abstract protected function render_segment($return_rendered);
 	/**
 	* create the html in relation to the wave of variation of the paths
 	*/
@@ -57,7 +61,15 @@ abstract class TreeFromPathsAbstract {
 		}
 		return $this->render_segment($return_render);	
 	}
-	abstract protected function prep_leaf_details(&$row);
+	/**
+	* Prepare the leaf of every file
+	*/
+	protected function prep_leaf_details(&$row){
+	    isset($row[1]) ? $this->datet = $row[1] : $this->datet = '';
+	    isset($row[2]) ? $this->size = human_filesize($row[2]) : $this->size = '';
+	    isset($row[4]) ? $this->status = $row[4] : $this->status = '';
+	    $this->icon = $this->get_icon($this->status);
+	}
 	abstract protected function get_icon($status);
 	/**
 	* Return or add rendered of single file
@@ -70,15 +82,47 @@ abstract class TreeFromPathsAbstract {
 	    $rendered = $this->waveSegment($return_render);
 	    if ($return_render) return $rendered;
 	}
-	abstract public function append_html_file($row,$pathfile);
 	/**
-	* Read the the array of files and compile html in $this->html
+	* Read the the array of files and compile string of render
  	*/
 	public function core(){
 	    # go in every line of the csv
 	    foreach ($this->arPaths as $key=>$row){
 		  $this->single_row($row);
 	    }
+	}
+}
+
+class TreeFromPathsJson extends TreeFromPathsAbstract {
+	protected $json_array = array();
+	
+	public function render($echo,&$arPaths){
+		
+	}	
+	protected function render_segment($return_rendered){
+		
+	}
+	
+	protected function open_tree(){
+		!$this->dif_level ? $label_details=' '. $this->datet.$this->size.$this->status : $label_details='';
+		$node = Array('data'=>$label_details);
+		$this->json_array = $node;
+	}
+	
+	protected function close_diff_levels(){
+	}
+	
+	protected function close_tree(){
+		
+	}
+	protected function get_icon($status){
+		
+	}
+	protected function reset_render(){
+		
+	}
+	protected function reset_segment(){
+		
 	}
 }
 
@@ -98,9 +142,6 @@ class TreeFromPaths extends TreeFromPathsAbstract {
 	protected $html_old='';
 	protected $html='';
 	protected $img_folder='';
-	protected $datet='';
-	protected $size='';
-	protected $status='';
 	protected $error_level = array('Header OK'=>'00','Header Corrotto'=>'01', 'Nessuna estensione'=>'02',
 				     'Tipo di file ambiguo o sconosciuto'=>'03' ,'File Criptato'=>'04','Errore di accesso' => '05',
 			 	     'File troppo piccolo (<512 bytes)'=>'06','File con lunghezza = 0'=>'07',
@@ -152,14 +193,13 @@ class TreeFromPaths extends TreeFromPathsAbstract {
 		if (!$this->dif_level) { # folder
 			$li_open=$this->li_open_shet;
 		} else { # leaf
-			$path = $this->_get_path($this->level);
 			$this->var_checkbox = sprintf($this->checkbox,$this->_get_path($this->level));
 			$li_open=$this->li_open; # is a leaf
 		}
 		
 		$this->html_new.=$li_open.$this->var_checkbox.$ico.$this->var_img_folder.$label."\n";
 		
-		if ($this->dif_level) { # folder
+		if ($this->dif_level) { # leaf
 			$this->html_new.=$this->ul_open."\n";
 			$this->ul_open_done=true;
 		}
@@ -178,23 +218,13 @@ class TreeFromPaths extends TreeFromPathsAbstract {
 		$this->var_img_folder = '';
 		$this->var_checkbox = '';
 	}
-	protected function render_segment($returnHTML){
-		if ($returnHTML){
+	protected function render_segment($return_rendered){
+		if ($return_rendered){
 			return $this->html_old.$this->html_new;
 		} else {
 			$this->html.=$this->html_old.$this->html_new;
 		}
 	}	
-	
-	/**
-	* Prepare the leaf of every file
-	*/
-	protected function prep_leaf_details(&$row){
-	    isset($row[1]) ? $this->datet = $row[1] : $this->datet = '';
-	    isset($row[2]) ? $this->size = human_filesize($row[2]) : $this->size = '';
-	    isset($row[4]) ? $this->status = $row[4] : $this->status = '';
-	    $this->icon = $this->get_icon($this->status);
-	}
 
 	/**
 	* Get icon color from Status
