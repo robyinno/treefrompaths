@@ -2,7 +2,7 @@ Tree from Paths
 Import a CSV file created with "File List Viewer"
 that contains the paths of an analized HDD for future recovery
 
-- Generate a html file with <li> and <ul> ready to be dressed with css
+- Now there is the abstract class and a class that extends and implement the a html file genration with <li> and <ul> ready to be dressed with css
 to give an html folder/files view
 
 - Select the folders
