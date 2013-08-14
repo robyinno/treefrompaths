@@ -1,8 +1,12 @@
 <?php
 class TreeFromPaths {
 
-	protected $new_segment;
-	protected $level;
+	protected $new_segment = Null;
+	protected $level = Null;
+	protected $dif_level = Null;
+	protected $var_img_folder = '';
+	protected $var_checkbox = '';
+	protected $ul_open_done = false; 
 	
 	private $arPaths;
 	private $path_separator='\\';
@@ -72,7 +76,7 @@ class TreeFromPaths {
 	
 	protected function open_tree(){
 		# add img folder if is a folder
-		if ($this->html_old=='' && $this->dif_level) $var_img_folder = $this->img_folder;
+		if ($this->html_old=='' && $this->dif_level) $this->var_img_folder = $this->img_folder;
 		$this->n_node +=1;
 		!$this->dif_level ? $label_details=' '. $this->datet.' <span class="color_size">'.$this->size.'</span>'.$this->status : $label_details='';
 		
@@ -90,7 +94,7 @@ class TreeFromPaths {
 		
 		$this->html_new.=$li_open.$this->var_checkbox.$ico.$this->var_img_folder.$label."\n";
 		
-		if (!$this->dif_level) { # folder
+		if ($this->dif_level) { # folder
 			$this->html_new.=$this->ul_open."\n";
 			$this->ul_open_done=true;
 		}
@@ -123,10 +127,13 @@ class TreeFromPaths {
 	 * Logic Core of WaveSegment
 	 */
 	private function waveSegment($returnHTML=false){
+		$this->dif_level = Null;
+		$this->new_segment = Null;
+		
 		#error_log(__FILE__ . __FUNCTION__);
 		$max_cur_levels=count($this->arCurSegments)-1; # max levels of current segment
-		$max_last_levels=count($this->arLastSegments)-1;
-		$already_closed=false;
+		$max_last_levels=count($this->arLastSegments)-1;	
+		
 		$this->reset_render();		
 	
 		if ($max_cur_levels<$max_last_levels){
