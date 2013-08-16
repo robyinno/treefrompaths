@@ -2,7 +2,7 @@
 abstract class TreeFromPathsAbstract {
 	protected $new_segment = Null;
 	protected $level = Null;
-	protected $dif_level = Null;
+	protected $is_folder = Null;
 	protected $arPaths;
 	protected $n_node=0;
 	protected $path_separator='\\';
@@ -22,9 +22,9 @@ abstract class TreeFromPathsAbstract {
 	protected function _get_path($level){
 	    return implode(array_slice($this->arCurSegments,0,$level+1),$this->path_separator);    
 	}
-	abstract protected function close_diff_levels();
-	abstract protected function open_tree();
-	abstract protected function close_tree();
+	abstract protected function close_folder();
+	abstract protected function open_node();
+	abstract protected function close_leaf();
 	abstract protected function reset_render();
 	abstract protected function reset_segment();
 	abstract protected function render_segment($return_rendered);
@@ -32,18 +32,18 @@ abstract class TreeFromPathsAbstract {
 	* create the html in relation to the wave of variation of the paths
 	*/
 	protected function waveSegment($return_render=false){
-		$this->dif_level = Null;
+		$this->is_folder = Null;
 		$this->new_segment = Null;
 		
 		#error_log(__FILE__ . __FUNCTION__);
 		$max_cur_levels=count($this->arCurSegments)-1; # max levels of current segment
-		$max_last_levels=count($this->arLastSegments)-1;	
+		$max_last_levels=count($this->arLastSegments)-1; # max leveles of last segment
 		
 		$this->reset_render();		
 	
 		if ($max_cur_levels<$max_last_levels){
-			for($i=1;$i<=($max_last_levels-$max_cur_levels);$i++){ # close the li and ul of the different levels
-				$this->close_diff_levels();				
+			for($i=1;$i<=($max_last_levels-$max_cur_levels);$i++){ # close as many folders as less level from last segment
+				$this->close_folder();				
 			}
 		}
 	
@@ -52,12 +52,12 @@ abstract class TreeFromPathsAbstract {
 			$this->reset_segment();			
 			# open folder and files
 			if ($this->new_segment!==$old_segment){
-				$this->dif_level=($this->level!=$max_cur_levels);
-				# close li and ul of the changed segment until there where levels in the last segments
-				if ($this->level<$max_last_levels && $this->dif_level) $this->close_diff_levels();
-				$this->open_tree(); #!$dif_level => folder 				
+				$this->is_folder = ($this->level != $max_cur_levels);
+				# close folder of the changed segment (not leaf) until there where levels in the last segments
+				if ($this->level < $max_last_levels && $this->is_folder) $this->close_folder();
+				$this->open_node(); #!$is_folder => folder 				
 			}
-			if ($this->level==$max_cur_levels) $this->close_tree(); 
+			if ($this->level==$max_cur_levels) $this->close_leaf(); 
 		}
 		return $this->render_segment($return_render);	
 	}
@@ -103,16 +103,24 @@ class TreeFromPathsJson extends TreeFromPathsAbstract {
 		
 	}
 	
-	protected function open_tree(){
-		!$this->dif_level ? $label_details=' '. $this->datet.$this->size.$this->status : $label_details='';
+	protected function open_node(){
+		!$this->is_folder ? $this->datet.$this->size.$this->status : $label_details='';
 		$node = Array('data'=>$label_details);
-		$this->json_array = $node;
+		if ($this->is_folder) $node['children'] = Null;
+		
+		if (isset($this->last_node['children']) || array_key_exists('children',$this->last_node)){
+			$this->last_node['children'] = &$node;
+		} else {
+			$this->last_node = &$node;	
+		}
+		#array_push
+		#$this->json_array = $node;
 	}
 	
-	protected function close_diff_levels(){
+	protected function close_folder(){
 	}
 	
-	protected function close_tree(){
+	protected function close_leaf(){
 		
 	}
 	protected function get_icon($status){
@@ -133,7 +141,7 @@ class TreeFromPaths extends TreeFromPathsAbstract {
 	protected $ul_open_done = false;
 	
 	protected $li_open='<li>';
-	protected $li_open_shet='<li class="dhtmlgoodies_sheet.gif">';
+	protected $li_open_sheet='<li class="dhtmlgoodies_sheet.gif">';
 	protected $li_close='</li>';
 	protected $ul_close='</ul>';
 	protected $ul_open='<ul>';
@@ -176,36 +184,36 @@ class TreeFromPaths extends TreeFromPathsAbstract {
 	    return $this->html;
 	}
 	 
-	protected function close_diff_levels(){
+	protected function close_folder(){
 		$this->html_old.=$this->ul_close."\n".$this->li_close."\n";
 	}
 	
-	protected function open_tree(){
+	protected function open_node(){
 		# add img folder if is a folder
-		if ($this->html_old=='' && $this->dif_level) $this->var_img_folder = $this->img_folder;
+		if ($this->html_old=='' && $this->is_folder) $this->var_img_folder = $this->img_folder;
 		$this->n_node +=1;
-		!$this->dif_level ? $label_details=' '. $this->datet.' <span class="color_size">'.$this->size.'</span>'.$this->status : $label_details='';
+		!$this->is_folder ? $label_details=' '. $this->datet.' <span class="color_size">'.$this->size.'</span>'.$this->status : $label_details='';
 		
 		$this->icon != '' ?  $class='class="'. $this->icon .'"' : $class='';
 		$ico   = '<a href="#" '.$class.'>&nbsp;</a>';
 		$label ='<a id="node_'.$this->n_node.'" href="#">'.$this->new_segment.$label_details.'</a></div>';
 		
-		if (!$this->dif_level) { # folder
-			$li_open=$this->li_open_shet;
-		} else { # leaf
+		if (!$this->is_folder) { # leaf
+			$li_open=$this->li_open_sheet;
+		} else { # folder
 			$this->var_checkbox = sprintf($this->checkbox,$this->_get_path($this->level));
-			$li_open=$this->li_open; # is a leaf
+			$li_open=$this->li_open; # is a folder
 		}
 		
 		$this->html_new.=$li_open.$this->var_checkbox.$ico.$this->var_img_folder.$label."\n";
 		
-		if ($this->dif_level) { # leaf
+		if ($this->is_folder) { # folder
 			$this->html_new.=$this->ul_open."\n";
 			$this->ul_open_done=true;
 		}
 	}
 	
-	protected function close_tree(){
+	protected function close_leaf(){
 		$this->html_new.=$this->li_close."\n";
 	}
 	
