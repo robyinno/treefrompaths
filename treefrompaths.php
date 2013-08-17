@@ -93,6 +93,54 @@ abstract class TreeFromPathsAbstract {
 	}
 }
 
+class TreeFromPathsjstre_htm extends TreeFromPathsAbstract{
+	protected $li_open='<li>';
+	protected $li_close='</li>';
+	protected $ul_close='</ul>';
+	protected $ul_open='<ul>';
+	protected $html_new='';
+	protected $html_old='';
+	
+	public function render($echo,&$arPaths){	
+	}	
+	protected function render_segment($return_rendered){
+		if ($return_rendered){
+			return $this->html_old.$this->html_new;
+		} else {
+			$this->html.=$this->html_old.$this->html_new;
+		}
+	}
+	protected function open_node(){
+		!$this->is_folder ? $label_details = $this->datet.$this->size.$this->status : $label_details='';
+		$label ='<a href="#">' . $this->new_segment.$label_details . '</a>';
+		$this->html_new.= $this->li_open .$label . "\n";
+		if ($this->is_folder) { 
+			$this->html_new.=$this->ul_open."\n";
+			$this->ul_open_done=true;
+		}
+	}
+	protected function close_folder(){
+		$this->html_old.=$this->ul_close."\n".$this->li_close."\n";
+	}
+	protected function close_leaf(){	
+		$this->html_new.=$this->li_close."\n";
+	}
+	protected function get_icon($status){
+	}
+	protected function reset_render(){
+		$this->html_new = '';
+		$this->html_old = '';
+	}
+	protected function reset_segment(){
+	}
+	/**
+	* Append to an html file a single file info
+	*/
+	public function append_html_file($row,$pathfile){
+	    return file_put_contents($pathfile,$this->single_row($row,true),FILE_APPEND);
+	}
+}
+
 class TreeFromPathsJson extends TreeFromPathsAbstract {
 	protected $json_array = array();
 	
@@ -113,21 +161,17 @@ class TreeFromPathsJson extends TreeFromPathsAbstract {
 		} else {
 			$this->last_node = &$node;	
 		}
-		#array_push
-		#$this->json_array = $node;
 	}
 	
 	protected function close_folder(){
 	}
 	
 	protected function close_leaf(){
-		
 	}
 	protected function get_icon($status){
 		
 	}
 	protected function reset_render(){
-		
 	}
 	protected function reset_segment(){
 		
