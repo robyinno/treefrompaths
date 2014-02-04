@@ -18,7 +18,7 @@ $path_file = decompress::extract($path_file);
 $filename_html = genhtml_tree_new::write_tree2html($path_file);
 
 $host  = $_SERVER['HTTP_HOST'];
-$url_tree = "http://$host" . $GLOBALS['SUB_DIR'] .$GLOBALS['TEMPLATES_DIR']. 'tree_basic_view.php';
+$url_tree = "http://$host" . $GLOBALS['SUB_DIR'] .$GLOBALS['TEMPLATES_DIR']. 'tree_basic_view3.php';
 
 
 if ($filename_html){
